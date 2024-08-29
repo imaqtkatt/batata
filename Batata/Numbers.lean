@@ -34,11 +34,52 @@ theorem zero_add (n : Nat) : 0 + n = n := by
 
 
 
+theorem zero_add_2 (n : Nat) : 0 + n = n :=
+  match n with
+  | .zero => rfl
+  | .succ pred =>
+    congrArg Nat.succ (zero_add_2 pred)
 
 
 
+theorem succ_add (a b : Nat) : (.succ a) + b = .succ (a + b) := by
+  induction b with
+  | zero =>
+    rw [add_zero]
+  | succ n ih =>
+    rw [add_succ, add_succ]
+    rw [ih]
 
 
+
+theorem succ_add_2 {a b : Nat} : (.succ a) + b = .succ (a + b) :=
+  match b with
+  | .zero => rfl
+  | .succ .. =>
+    congrArg Nat.succ succ_add_2
+
+
+
+theorem add_comm {a b : Nat} : a + b = b + a := by
+  induction b with
+  | zero =>
+    rw [zero_add, add_zero]
+  | succ p ih =>
+    rw [succ_add, add_succ]
+    rw [ih]
+
+
+
+theorem add_comm_2 (a b : Nat) : a + b = b + a :=
+  match b with
+  | .zero =>
+    Eq.symm (zero_add a)
+  | .succ pred =>
+    sorry
+
+
+
+-- foo
 
 inductive NumLe : Nat → Nat → Prop
 | refl {n : Nat} : NumLe n n
