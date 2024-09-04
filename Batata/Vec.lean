@@ -37,26 +37,32 @@ instance {m n : Nat} {α : Type} : HAppend (Vec α m) (Vec α n) (Vec α (m + n)
 theorem length_increases {v : Vec Unit n} : (Vec.append_el () v).length > n := by
   simp [Vec.append_el, Vec.length]
 
-theorem append_nil {a : Vec α m} : a = Vec.append a .nil :=
+@[simp] theorem append_nil {a : Vec α m} : a.append .nil = a  :=
   match a with
   | .nil => rfl
   | .cons .. => by
-    simp [Vec.append]
+    simp [Vec.append, List.append_nil]
     exact append_nil
 
 @[simp] theorem nil_append {α : Type} {n : Nat} {a : Vec α n} :
-  (Vec.append .nil a) = by {simp [Nat.add]; exact a} := rfl
+  Vec.nil.append a = by {simp [Nat.add]; exact a} := rfl
 
-theorem rev_single {α : Type} {el : α} : (Vec.cons el Vec.nil).reverse = (Vec.cons el Vec.nil) := by
-  simp [Vec.reverse, Vec.append]
+@[simp] theorem rev_single {α : Type} {a : Vec α 1} : a.reverse = a := by
+  cases a
+  case cons head tail =>
+    cases tail
+    case nil =>
+      simp [Vec.reverse, Vec.append]
+
+@[simp] theorem rev_single_ {α : Type} {el : α} : (Vec.cons el .nil).reverse = Vec.cons el .nil := by
+  exact rev_single
 
 theorem rev_append_rev_rev {α : Type} {m n : Nat} (a : Vec α m) (b : Vec α m) :
   Vec.reverse (Vec.append a b) = Vec.append (Vec.reverse b) (Vec.reverse a) := by
-  induction a with
+  induction b with
   | nil =>
     simp [Vec.append, Vec.reverse]
-    exact append_nil
-  | cons head tail =>
+  | cons head tail i =>
     simp [Vec.reverse, Vec.append]
     sorry
 
@@ -76,3 +82,12 @@ theorem rev_rev {α : Type} {n : Nat} {v : Vec α n} : v.reverse.reverse = v := 
   | cons head tail =>
     simp [Vec.reverse, Vec.append]
     exact rev_tail_append_head_rev
+
+-- #eval
+--   let tail := (Vec.cons 3 (Vec.cons 4 Vec.nil));
+--   (tail.reverse ++ (Vec.cons 1 .nil)).reverse
+
+-- #eval (Vec.cons 1 (Vec.reverse (.cons 2 (.cons 3 .nil)))).reverse
+-- #eval (Vec.cons 1 (Vec.reverse (.cons 2 (.cons 3 (.cons 4 .nil))))).reverse
+
+-- rev (cons head (rev tail)) = cons head tail
